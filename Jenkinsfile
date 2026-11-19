@@ -2,26 +2,19 @@
 pipeline {
     agent any
 
-    environment {
-        VENV = "/tmp/flask-jenkins-venv"
-    }
-
     stages {
         stage('Build') {
             steps {
-                echo 'Creating virtual environment and installing dependencies...'
-                sh '''
-                    rm -rf "$VENV"
-                    python3 -m venv "$VENV"
-                    "$VENV/bin/pip" install -r requirements.txt
-                '''
+                echo 'Preparing Python application...'
+                sh 'python3 --version'
+                sh 'python3 -c "import flask; print(\'Flask installed successfully\')"'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running tests...'
-                sh '"$VENV/bin/python" -m unittest discover -s .'
+                echo 'Running unit tests...'
+                sh 'python3 -m unittest discover -s .'
             }
         }
 
@@ -39,7 +32,7 @@ pipeline {
             steps {
                 echo 'Running application...'
                 sh '''
-                    nohup "$VENV/bin/python" "$WORKSPACE/python-app-deploy/app.py" > "$WORKSPACE/python-app-deploy/app.log" 2>&1 &
+                    nohup python3 "$WORKSPACE/python-app-deploy/app.py" > "$WORKSPACE/python-app-deploy/app.log" 2>&1 < /dev/null &
                     echo $! > "$WORKSPACE/python-app-deploy/app.pid"
                 '''
             }
@@ -48,7 +41,7 @@ pipeline {
         stage('Test Application') {
             steps {
                 echo 'Testing application...'
-                sh '"$VENV/bin/python" test_app.py'
+                sh 'python3 test_app.py'
             }
         }
     }
