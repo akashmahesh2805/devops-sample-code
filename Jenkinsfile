@@ -1,16 +1,12 @@
 pipeline {
     agent any
 
-    environment {
-        PYTHONPATH = '/usr/lib/python3/dist-packages'
-    }
-
     stages {
         stage('Build') {
             steps {
                 echo 'Preparing Python application...'
                 sh 'python3 --version'
-                sh 'python3 -c "import flask; print(\'Flask installed successfully:\', flask.__version__)"'
+                sh '''python3 -c "import sys; sys.path.insert(0, '/usr/lib/python3/dist-packages'); import flask; print('Flask installed successfully:', flask.__version__)"'''
             }
         }
 

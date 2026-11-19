@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, "/usr/lib/python3/dist-packages")
+
 from flask import Flask
 
 app = Flask(__name__)
@@ -7,4 +10,4 @@ def home():
     return "Hello, Jenkins Multi-Stage Pipeline!"
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
