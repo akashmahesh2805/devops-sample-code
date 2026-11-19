@@ -8,15 +8,14 @@ pipeline {
                 sh '''
                     set -e
 
-                    rm -rf .venv
+                    echo "Checking Python version..."
+                    /usr/bin/python3 --version
 
-                    /usr/bin/python3 -m venv --without-pip .venv
+                    echo "Checking Flask dependency..."
+                    /usr/bin/python3 -c "import flask; print('Flask version:', flask.__version__)"
 
-                    # Make Debian's installed Python packages visible
-                    echo "/usr/lib/python3/dist-packages" > .venv/lib/python3.13/site-packages/debian-packages.pth
-
-                    .venv/bin/python --version
-                    .venv/bin/python -c "import flask; print('Flask installed:', flask.__version__)"
+                    echo "Checking application syntax..."
+                    /usr/bin/python3 -m py_compile app.py test_app.py
 
                     echo "Build completed successfully."
                 '''
@@ -28,21 +27,26 @@ pipeline {
                 echo 'Running unit tests...'
                 sh '''
                     set -e
-                    .venv/bin/python -m unittest discover -s . -p 'test_*.py' -v
+                    /usr/bin/python3 -m unittest discover -s . -p 'test_*.py' -v
                 '''
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying application...'
+                echo 'Deploying Python application...'
                 sh '''
                     set -e
+
                     rm -rf python-app-deploy
                     mkdir -p python-app-deploy
+
                     cp app.py requirements.txt python-app-deploy/
-                    echo "Deployment completed successfully."
+
+                    echo "Deployment contents:"
                     ls -l python-app-deploy/
+
+                    echo "Deployment completed successfully."
                 '''
             }
         }
