@@ -1,18 +1,17 @@
 pipeline {
     agent any
 
+    environment {
+        PYTHONPATH = '/var/jenkins_home/python-packages'
+    }
+
     stages {
         stage('Build') {
             steps {
-                echo 'Installing Flask dependencies...'
+                echo 'Building Python application...'
                 sh '''
-                    mkdir -p "$WORKSPACE/.python-packages"
-
-                    PYTHONPATH=/usr/lib/python3/dist-packages \
-                    python3 -m pip install \
-                    --break-system-packages \
-                    --target "$WORKSPACE/.python-packages" \
-                    -r requirements.txt
+                    python3 --version
+                    python3 -c "import flask; print('Flask installed:', flask.__version__)"
                 '''
             }
         }
@@ -20,10 +19,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running unit tests...'
-                sh '''
-                    PYTHONPATH="$WORKSPACE/.python-packages:/usr/lib/python3/dist-packages" \
-                    python3 -m unittest discover -s .
-                '''
+                sh 'python3 -m unittest discover -s .'
             }
         }
 
@@ -33,7 +29,6 @@ pipeline {
                 sh '''
                     rm -rf "$WORKSPACE/python-app-deploy"
                     mkdir -p "$WORKSPACE/python-app-deploy"
-
                     cp app.py requirements.txt "$WORKSPACE/python-app-deploy/"
                 '''
             }
