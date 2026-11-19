@@ -10,7 +10,10 @@ pipeline {
 
                     rm -rf .venv
 
-                    /usr/bin/python3 -m venv --without-pip --system-site-packages .venv
+                    /usr/bin/python3 -m venv --without-pip .venv
+
+                    # Make Debian's installed Python packages visible
+                    echo "/usr/lib/python3/dist-packages" > .venv/lib/python3.13/site-packages/debian-packages.pth
 
                     .venv/bin/python --version
                     .venv/bin/python -c "import flask; print('Flask installed:', flask.__version__)"
@@ -38,7 +41,7 @@ pipeline {
                     rm -rf python-app-deploy
                     mkdir -p python-app-deploy
                     cp app.py requirements.txt python-app-deploy/
-                    echo "Deployment completed."
+                    echo "Deployment completed successfully."
                     ls -l python-app-deploy/
                 '''
             }
