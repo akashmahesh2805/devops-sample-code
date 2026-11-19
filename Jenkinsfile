@@ -6,15 +6,15 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Preparing Python application...'
-                sh 'python3 --version'
-                sh 'python3 -c "import flask; print(\'Flask installed successfully\')"'
+                sh '/usr/bin/python3 --version'
+                sh '/usr/bin/python3 -c "import flask; print(\'Flask installed successfully\')"'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running unit tests...'
-                sh 'python3 -m unittest discover -s .'
+                sh '/usr/bin/python3 -m unittest discover -s .'
             }
         }
 
@@ -32,7 +32,7 @@ pipeline {
             steps {
                 echo 'Running application...'
                 sh '''
-                    nohup python3 "$WORKSPACE/python-app-deploy/app.py" > "$WORKSPACE/python-app-deploy/app.log" 2>&1 < /dev/null &
+                    nohup /usr/bin/python3 "$WORKSPACE/python-app-deploy/app.py" > "$WORKSPACE/python-app-deploy/app.log" 2>&1 < /dev/null &
                     echo $! > "$WORKSPACE/python-app-deploy/app.pid"
                 '''
             }
@@ -41,7 +41,7 @@ pipeline {
         stage('Test Application') {
             steps {
                 echo 'Testing application...'
-                sh 'python3 test_app.py'
+                sh '/usr/bin/python3 test_app.py'
             }
         }
     }
