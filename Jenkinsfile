@@ -7,10 +7,15 @@ pipeline {
                 echo 'Building Python application...'
                 sh '''
                     set -e
+
                     rm -rf .venv
-                    python3 -m venv .venv
+
+                    env -u PYTHONHOME -u PYTHONPATH \
+                        /usr/bin/python3 -m venv .venv
+
                     .venv/bin/python --version
                     .venv/bin/python -m pip install -r requirements.txt
+
                     .venv/bin/python -c "import flask; print('Flask installed:', flask.__version__)"
                 '''
             }
@@ -34,7 +39,7 @@ pipeline {
                     rm -rf python-app-deploy
                     mkdir -p python-app-deploy
                     cp app.py requirements.txt python-app-deploy/
-                    echo 'Application deployed to python-app-deploy/'
+                    echo 'Application deployed successfully!'
                     ls -l python-app-deploy/
                 '''
             }
