@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, "/var/jenkins_home/python-packages")
+
 from flask import Flask
 
 app = Flask(__name__)

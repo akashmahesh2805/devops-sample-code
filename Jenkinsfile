@@ -1,18 +1,13 @@
 pipeline {
     agent any
 
-    environment {
-        PYTHONPATH = "/usr/lib/python3/dist-packages:${WORKSPACE}/.python-packages"
-    }
-
     stages {
         stage('Build') {
             steps {
-                echo 'Installing Python dependencies...'
+                echo 'Checking Python and Flask...'
                 sh '''
-                    mkdir -p "$WORKSPACE/.python-packages"
-                    /usr/bin/pip3 install --target "$WORKSPACE/.python-packages" Flask==3.1.1
-                    python3 -c "import flask; print('Flask installed successfully:', flask.__version__)"
+                    python3 --version
+                    python3 -c "import sys; sys.path.insert(0, '/var/jenkins_home/python-packages'); import flask; print('Flask:', flask.__version__)"
                 '''
             }
         }
