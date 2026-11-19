@@ -6,18 +6,29 @@ pipeline {
             steps {
                 echo 'Building Python application...'
                 sh '''
-                    set -e
+                    set -eu
 
-                    echo "Checking Python version..."
-                    /usr/bin/python3 --version
+                    rm -rf .venv
+                    /usr/bin/python3 -m venv --without-pip .venv
 
-                    echo "Checking Flask dependency..."
-                    /usr/bin/python3 -c "import flask; print('Flask version:', flask.__version__)"
+                    SITE="$WORKSPACE/.venv/lib/python3.13/site-packages"
+                    mkdir -p "$SITE"
 
-                    echo "Checking application syntax..."
-                    /usr/bin/python3 -m py_compile app.py test_app.py
+                    echo "Copying Flask and its dependencies..."
 
-                    echo "Build completed successfully."
+                    for package in flask blinker click itsdangerous jinja2 markupsafe werkzeug; do
+                        find /usr/lib/python3/dist-packages \
+                            -maxdepth 1 \
+                            \\( -name "$package" \
+                            -o -name "$package-*.dist-info" \
+                            -o -name "$package-*.egg-info" \\) \
+                            -exec cp -a {} "$SITE/" \\;
+                    done
+
+                    echo "Verifying Flask..."
+                    .venv/bin/python -c "import flask; print('Flask:', flask.__file__); print('Version:', flask.__version__)"
+
+                    echo "Build completed."
                 '''
             }
         }
@@ -27,26 +38,21 @@ pipeline {
                 echo 'Running unit tests...'
                 sh '''
                     set -e
-                    /usr/bin/python3 -m unittest discover -s . -p 'test_*.py' -v
+                    .venv/bin/python -m unittest discover -s . -p 'test_*.py' -v
                 '''
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying Python application...'
+                echo 'Deploying application...'
                 sh '''
                     set -e
-
                     rm -rf python-app-deploy
                     mkdir -p python-app-deploy
-
                     cp app.py requirements.txt python-app-deploy/
-
                     echo "Deployment contents:"
                     ls -l python-app-deploy/
-
-                    echo "Deployment completed successfully."
                 '''
             }
         }
