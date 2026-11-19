@@ -1,12 +1,19 @@
 pipeline {
     agent any
 
+    environment {
+        PYTHONPATH = "${WORKSPACE}/.python-packages"
+    }
+
     stages {
         stage('Build') {
             steps {
-                echo 'Preparing Python application...'
-                sh 'python3 --version'
-                sh '''python3 -c "import sys; sys.path.insert(0, '/usr/lib/python3/dist-packages'); import flask; print('Flask installed successfully:', flask.__version__)"'''
+                echo 'Installing Python dependencies...'
+                sh '''
+                    mkdir -p "$WORKSPACE/.python-packages"
+                    python3 -m pip install --target "$WORKSPACE/.python-packages" Flask==3.1.1
+                    python3 -c "import flask; print('Flask installed successfully:', flask.__version__)"
+                '''
             }
         }
 
@@ -33,6 +40,7 @@ pipeline {
                 sh '''
                     nohup python3 "$WORKSPACE/python-app-deploy/app.py" > "$WORKSPACE/python-app-deploy/app.log" 2>&1 < /dev/null &
                     echo $! > "$WORKSPACE/python-app-deploy/app.pid"
+                    sleep 2
                 '''
             }
         }
