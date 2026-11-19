@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        PYTHONPATH = '/var/jenkins_home/python-packages'
+        PYTHON = '/var/jenkins_home/flask-venv/bin/python'
     }
 
     stages {
@@ -10,8 +10,8 @@ pipeline {
             steps {
                 echo 'Building Python application...'
                 sh '''
-                    python3 --version
-                    python3 -c "import flask; print('Flask installed:', flask.__version__)"
+                    "$PYTHON" --version
+                    "$PYTHON" -c "import flask; print('Flask installed:', flask.__version__)"
                 '''
             }
         }
@@ -19,7 +19,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running unit tests...'
-                sh 'python3 -m unittest discover -s .'
+                sh '"$PYTHON" -m unittest discover -s .'
             }
         }
 
