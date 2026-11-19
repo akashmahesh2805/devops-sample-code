@@ -2,13 +2,18 @@
 pipeline {
     agent any
 
+    environment {
+        VENV = "/tmp/flask-jenkins-venv"
+    }
+
     stages {
         stage('Build') {
             steps {
                 echo 'Creating virtual environment and installing dependencies...'
                 sh '''
-                    python3 -m venv .venv
-                    .venv/bin/pip install -r requirements.txt
+                    rm -rf "$VENV"
+                    python3 -m venv "$VENV"
+                    "$VENV/bin/pip" install -r requirements.txt
                 '''
             }
         }
@@ -16,7 +21,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh '.venv/bin/python -m unittest discover -s .'
+                sh '"$VENV/bin/python" -m unittest discover -s .'
             }
         }
 
@@ -24,8 +29,8 @@ pipeline {
             steps {
                 echo 'Deploying application...'
                 sh '''
-                    mkdir -p ${WORKSPACE}/python-app-deploy
-                    cp ${WORKSPACE}/app.py ${WORKSPACE}/python-app-deploy/
+                    mkdir -p "$WORKSPACE/python-app-deploy"
+                    cp "$WORKSPACE/app.py" "$WORKSPACE/python-app-deploy/"
                 '''
             }
         }
@@ -34,8 +39,8 @@ pipeline {
             steps {
                 echo 'Running application...'
                 sh '''
-                    nohup ${WORKSPACE}/.venv/bin/python ${WORKSPACE}/python-app-deploy/app.py > ${WORKSPACE}/python-app-deploy/app.log 2>&1 &
-                    echo $! > ${WORKSPACE}/python-app-deploy/app.pid
+                    nohup "$VENV/bin/python" "$WORKSPACE/python-app-deploy/app.py" > "$WORKSPACE/python-app-deploy/app.log" 2>&1 &
+                    echo $! > "$WORKSPACE/python-app-deploy/app.pid"
                 '''
             }
         }
@@ -43,7 +48,7 @@ pipeline {
         stage('Test Application') {
             steps {
                 echo 'Testing application...'
-                sh '.venv/bin/python test_app.py'
+                sh '"$VENV/bin/python" test_app.py'
             }
         }
     }
