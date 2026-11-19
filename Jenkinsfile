@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        PYTHONPATH = "${WORKSPACE}/.python-packages"
+        PYTHONPATH = "/usr/lib/python3/dist-packages:${WORKSPACE}/.python-packages"
     }
 
     stages {
@@ -11,7 +11,7 @@ pipeline {
                 echo 'Installing Python dependencies...'
                 sh '''
                     mkdir -p "$WORKSPACE/.python-packages"
-                    python3 -m pip install --target "$WORKSPACE/.python-packages" Flask==3.1.1
+                    /usr/bin/pip3 install --target "$WORKSPACE/.python-packages" Flask==3.1.1
                     python3 -c "import flask; print('Flask installed successfully:', flask.__version__)"
                 '''
             }
